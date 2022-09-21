@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass redis --appendonly yes
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - /Users/marciopessoa/volume_docker_data/redis/data:/data
+
+  redisinsight:
+    image: redislabs/redisinsight
+    restart: always
+    ports:
+      - 8011:8001
+    volumes:
+      - /Users/marciopessoa/volume_docker_data/redisinsight:/db
+    depends_on:
+      - redis
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      MYSQL_ROOT_PASSWORD: local_root_password
+      MYSQL_DATABASE: db
+    ports:
+      - 3307:3306
+    volumes:
+      - /Users/marciopessoa/volume_docker_data/mysql/data:/var/lib/mysql
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    environment:
+      # choose your favorite design from https://www.adminer.org/
+      ADMINER_DESIGN: poc_lello
+    ports:
+      - 8090:8080
+    depends_on:
+      - mysql
